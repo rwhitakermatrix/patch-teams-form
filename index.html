@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PATCH Form Debug2</title>
+  <title>PATCH Form Debug</title>
   <meta charset="UTF-8" />
   <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <style>
@@ -14,43 +14,48 @@
   <div id="status">Loading Teams SDK...</div>
   <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <script>
-    // loads the HubSpot form – called once we have (or don't have) user data
-    function loadForm(email = '', first = '', last = '') {
-      const url = `https://share.hsforms.com/1o9R-MCZ1S_iDscHC7T7krQc31ye`
-                + `?email=${email}&firstname=${first}&lastname=${last}`;
-      const iframe = document.createElement('iframe');
-      iframe.src   = url;
-      iframe.style.cssText = 'width:100%;height:100%;border:none';
-      document.body.innerHTML = '';
-      document.body.appendChild(iframe);
+  function loadForm(email='', first='', last='') {
+    const url = `https://share.hsforms.com/1o9R-MCZ1S_iDscHC7T7krQc31ye`
+              + `?email=${email}&firstname=${first}&lastname=${last}`;
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.cssText = 'width:100%;height:100%;border:none';
+    document.body.innerHTML = '';
+    document.body.appendChild(iframe);
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.microsoftTeams) {
+      document.getElementById('status').textContent = 'Teams SDK not loaded';
+      return;
     }
+    microsoftTeams.initialize();
   
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof microsoftTeams === 'undefined') {
-        document.getElementById('status').textContent = 'Teams SDK not loaded';
-        return;
-      }
-  
-      // initialise SDK (no Promise is returned in v1.x)
-      microsoftTeams.initialize();
-  
-      document.getElementById('status').textContent = 'Getting context…';
-  
-      // callback-style getContext
-      microsoftTeams.getContext((context) => {
-        if (context && context.user) {
-          const { userPrincipalName, givenName, surname } = context.user;
+    // getAuthToken performs silent SSO – returns a Graph-scoped token
+    microsoftTeams.authentication.getAuthToken({
+      successCallback: (token) => {
+        fetch('https://graph.microsoft.com/v1.0/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(r => r.json())
+        .then(me => {
           loadForm(
-            encodeURIComponent(userPrincipalName || ''),
-            encodeURIComponent(givenName         || ''),
-            encodeURIComponent(surname           || '')
+            encodeURIComponent(me.mail || me.userPrincipalName || ''),
+            encodeURIComponent(me.givenName || ''),
+            encodeURIComponent(me.surname || '')
           );
-        } else {
-          // no user info – show blank form
-          loadForm();
-        }
-      });
+        })
+        .catch(err => {
+          console.error('Graph error', err);
+          loadForm();          // fallback
+        });
+      },
+      failureCallback: (err) => {
+        console.error('SSO token error', err);
+        loadForm();            // fallback
+      }
     });
+  });
   </script>
 </body>
 </html>
