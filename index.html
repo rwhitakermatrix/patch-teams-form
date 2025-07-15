@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PATCH Form Debug</title>
+  <title>PATCH Form Debug2</title>
   <meta charset="UTF-8" />
   <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <style>
@@ -12,49 +12,45 @@
 </head>
 <body>
   <div id="status">Loading Teams SDK...</div>
+  <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <script>
-    // Initialize the Teams app
-    function initializeTeamsApp() {
-      // Check if Teams SDK is loaded
+    // loads the HubSpot form – called once we have (or don't have) user data
+    function loadForm(email = '', first = '', last = '') {
+      const url = `https://share.hsforms.com/1o9R-MCZ1S_iDscHC7T7krQc31ye`
+                + `?email=${email}&firstname=${first}&lastname=${last}`;
+      const iframe = document.createElement('iframe');
+      iframe.src   = url;
+      iframe.style.cssText = 'width:100%;height:100%;border:none';
+      document.body.innerHTML = '';
+      document.body.appendChild(iframe);
+    }
+  
+    document.addEventListener('DOMContentLoaded', () => {
       if (typeof microsoftTeams === 'undefined') {
         document.getElementById('status').textContent = 'Teams SDK not loaded';
         return;
       }
-
-      try {
-        // Initialize Teams SDK
-        microsoftTeams.initialize();
-        
-        // Get context
-        document.getElementById('status').textContent = 'Getting context...';
-        
-        // Get user context
-        microsoftTeams.getContext().then((context) => {
-          // Get user information
-          const user = context.user || {};
-          const email = encodeURIComponent(user.userPrincipalName || '');
-          const first = encodeURIComponent(user.givenName || '');
-          const last = encodeURIComponent(user.surname || '');
-
-          // Load form with user info
-          document.getElementById('status').textContent = 'Loading form...';
-          loadForm(email, first, last);
-        }).catch((err) => {
-          document.getElementById('status').textContent = 'Error getting context: ' + (err && err.message ? err.message : 'Unknown error');
-          console.error('Context Error:', err);
-          
-          // Fallback to empty form if we can't get user context
+  
+      // initialise SDK (no Promise is returned in v1.x)
+      microsoftTeams.initialize();
+  
+      document.getElementById('status').textContent = 'Getting context…';
+  
+      // callback-style getContext
+      microsoftTeams.getContext((context) => {
+        if (context && context.user) {
+          const { userPrincipalName, givenName, surname } = context.user;
+          loadForm(
+            encodeURIComponent(userPrincipalName || ''),
+            encodeURIComponent(givenName         || ''),
+            encodeURIComponent(surname           || '')
+          );
+        } else {
+          // no user info – show blank form
           loadForm();
-        });
-      } catch (err) {
-        document.getElementById('status').textContent = 'Error initializing Teams SDK: ' + err.message;
-        console.error('SDK Initialization Error:', err);
-        loadForm(); // Load empty form as fallback
-      }
-    }
-
-    // Initialize when the DOM is loaded
-    document.addEventListener('DOMContentLoaded', initializeTeamsApp);
+        }
+      });
+    });
   </script>
 </body>
 </html>
