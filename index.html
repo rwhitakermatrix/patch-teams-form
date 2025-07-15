@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PATCH Form Debug2</title>
+  <title>PATCH Form Debug3</title>
   <meta charset="UTF-8" />
   <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <style>
@@ -13,6 +13,13 @@
 <body>
   <div id="status">Loading Teams SDK...</div>
   <script>
+    // Check if Teams SDK is loaded
+    if (typeof microsoftTeams === 'undefined') {
+      document.getElementById('status').textContent = 'Teams SDK not loaded';
+      return;
+    }
+
+    // Add error handling for initialization
     microsoftTeams.initialize()
       .then(() => {
         document.getElementById('status').textContent = 'Getting context...';
@@ -36,7 +43,9 @@
         document.body.appendChild(iframe);
       })
       .catch(err => {
-        document.getElementById('status').textContent = 'Error initializing Teams SDK: ' + err.message;
+        const errorMessage = err && err.message ? err.message : 'Unknown error';
+        document.getElementById('status').textContent = 'Error initializing Teams SDK: ' + errorMessage;
+        console.error('SDK Initialization Error:', err);
       });
   </script>
 </body>
