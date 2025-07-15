@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PATCH Form Debug</title>
+  <title>PATCH Form Debug2</title>
   <meta charset="UTF-8" />
-  <script src="https://statics.teams.cdn.office.net/sdk/v1.12.0/js/MicrosoftTeams.min.js"></script>
+  <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <style>
     html, body, iframe {
       margin: 0; padding: 0; width: 100%; height: 100%; border: none;
@@ -13,10 +13,10 @@
 <body>
   <div id="status">Loading Teams SDK...</div>
   <script>
-    microsoftTeams.app.initialize()
+    microsoftTeams.initialize()
       .then(() => {
         document.getElementById('status').textContent = 'Getting context...';
-        return microsoftTeams.app.getContext();
+        return microsoftTeams.getContext();
       })
       .then(context => {
         document.getElementById('status').textContent = 'Loading form...';
