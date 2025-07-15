@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PATCH Form Debug2</title>
+  <title>PATCH Form Debug3</title>
   <meta charset="UTF-8" />
   <script src="https://statics.teams.cdn.office.net/sdk/v1.13.0/js/MicrosoftTeams.min.js"></script>
   <style>
@@ -28,14 +28,13 @@
         // Get context
         document.getElementById('status').textContent = 'Getting context...';
         
-        // Wait for context to be ready
-        microsoftTeams.app.getContext().then(context => {
-          document.getElementById('status').textContent = 'Loading form...';
-          
+        // Get user context
+        microsoftTeams.app.getContext().then((context) => {
           // Get user information
-          const email = encodeURIComponent(context.user.userPrincipalName || '');
-          const first = encodeURIComponent(context.user.givenName || '');
-          const last = encodeURIComponent(context.user.surname || '');
+          const user = context.user || {};
+          const email = encodeURIComponent(user.userPrincipalName || '');
+          const first = encodeURIComponent(user.givenName || '');
+          const last = encodeURIComponent(user.surname || '');
 
           // Load form
           const url = `https://share.hsforms.com/1o9R-MCZ1S_iDscHC7T7krQc31ye?email=${email}&firstname=${first}&lastname=${last}`;
@@ -47,9 +46,20 @@
 
           document.body.innerHTML = ''; // Clear status
           document.body.appendChild(iframe);
-        }).catch(err => {
-          document.getElementById('status').textContent = 'Error getting context: ' + err.message;
+        }).catch((err) => {
+          document.getElementById('status').textContent = 'Error getting context: ' + (err && err.message ? err.message : 'Unknown error');
           console.error('Context Error:', err);
+          
+          // Fallback to empty form if we can't get user context
+          const url = 'https://share.hsforms.com/1o9R-MCZ1S_iDscHC7T7krQc31ye';
+          const iframe = document.createElement('iframe');
+          iframe.src = url;
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+
+          document.body.innerHTML = ''; // Clear status
+          document.body.appendChild(iframe);
         });
 
         // Load form
