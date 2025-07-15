@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PATCH Form</title>
+  <meta charset="UTF-8" />
+  <script src="https://statics.teams.cdn.office.net/sdk/v1.12.0/js/MicrosoftTeams.min.js"></script>
+  <style>
+    html, body, iframe {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    microsoftTeams.app.initialize().then(() => {
+      microsoftTeams.app.getContext().then((context) => {
+        const email = encodeURIComponent(context.user?.userPrincipalName || '');
+        const first = encodeURIComponent(context.user?.givenName || '');
+        const last = encodeURIComponent(context.user?.surname || '');
+
+        const url = `https://share.hsforms.com/1o9R-MCZ1S_iDscHC7T7krQc31ye?email=${email}&firstname=${first}&lastname=${last}`;
+
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        document.body.appendChild(iframe);
+      });
+    });
+  </script>
+</body>
+</html>
